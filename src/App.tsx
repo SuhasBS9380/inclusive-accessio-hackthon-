@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "./context/auth-context";
 
 import Layout from "./components/layout/layout";
 import HomePage from "./pages/Index";
@@ -18,6 +19,7 @@ import DesignAssistantPage from "./pages/design-assistant";
 import TextToImagePage from "./pages/text-to-image";
 import VideoCaptioningPage from "./pages/video-captioning";
 import TextResizerPage from "./pages/text-resizer";
+import AuthPage from "./pages/auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,25 +30,28 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <SidebarProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Layout />}>
-                <Route index element={<HomePage />} />
-                <Route path="/text-simplifier" element={<TextSimplifierPage />} />
-                <Route path="/image-caption" element={<ImageCaptionPage />} />
-                <Route path="/ai-assistant" element={<AiAssistantPage />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/content-audit" element={<ContentAuditPage />} />
-                <Route path="/design-assistant" element={<DesignAssistantPage />} />
-                <Route path="/text-to-image" element={<TextToImagePage />} />
-                <Route path="/video-captioning" element={<VideoCaptioningPage />} />
-                <Route path="/text-resizer" element={<TextResizerPage />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </SidebarProvider>
+        <AuthProvider>
+          <SidebarProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<HomePage />} />
+                  <Route path="/text-simplifier" element={<TextSimplifierPage />} />
+                  <Route path="/image-caption" element={<ImageCaptionPage />} />
+                  <Route path="/ai-assistant" element={<AiAssistantPage />} />
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/content-audit" element={<ContentAuditPage />} />
+                  <Route path="/design-assistant" element={<DesignAssistantPage />} />
+                  <Route path="/text-to-image" element={<TextToImagePage />} />
+                  <Route path="/video-captioning" element={<VideoCaptioningPage />} />
+                  <Route path="/text-resizer" element={<TextResizerPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </SidebarProvider>
+        </AuthProvider>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>

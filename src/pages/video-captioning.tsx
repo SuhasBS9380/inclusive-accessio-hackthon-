@@ -1,51 +1,144 @@
-
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { VideoIcon, Upload, Edit, DownloadCloud, Loader2 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { FileVideo, Upload, Type, Download, Play, Pause, SkipBack, Clock, Languages } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function VideoCaptioningPage() {
-  const [activeTab, setActiveTab] = useState("generate");
-  const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [captionsGenerated, setCaptionsGenerated] = useState(false);
+  const [captions, setCaptions] = useState<string>("");
+  const [language, setLanguage] = useState<string>("en");
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      setIsUploading(true);
-      
-      // Simulate upload process
-      setTimeout(() => {
-        setIsUploading(false);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type.startsWith("video/")) {
+        setVideoFile(file);
+        const videoUrl = URL.createObjectURL(file);
+        setVideoPreview(videoUrl);
+        setCaptions(""); // Reset captions when new video is uploaded
+      } else {
         toast({
-          title: "Upload Complete",
-          description: `${e.target.files![0].name} has been uploaded.`,
+          title: "Invalid file type",
+          description: "Please upload a video file.",
+          variant: "destructive",
         });
-      }, 2000);
+      }
     }
   };
 
-  const handleGenerateCaptions = () => {
-    if (!file) return;
-    
-    setIsProcessing(true);
-    // Simulate processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      setCaptionsGenerated(true);
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const generateCaptions = async () => {
+    if (!videoFile) {
       toast({
-        title: "Captions Generated",
-        description: "Your video captions are ready for review.",
+        title: "No video selected",
+        description: "Please upload a video to generate captions.",
+        variant: "destructive",
       });
-    }, 4000);
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    try {
+      // Call the Supabase Edge Function for caption generation
+      const { data, error } = await supabase.functions.invoke('generate-captions', {
+        body: {
+          videoUrl: videoPreview,
+          language: language
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setCaptions(data.captions);
+      toast({
+        title: "Captions generated",
+        description: "Video captions have been successfully generated.",
+      });
+    } catch (error) {
+      console.error("Error generating captions:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate captions. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handlePlayPause = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  };
+
+  const handleRestart = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      setCurrentTime(0);
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const downloadCaptions = () => {
+    if (!captions) {
+      toast({
+        title: "No captions",
+        description: "Generate captions first before downloading.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const blob = new Blob([captions], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'captions.srt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Captions downloaded",
+      description: "Captions have been downloaded as an SRT file.",
+    });
   };
 
   return (
@@ -53,320 +146,235 @@ export default function VideoCaptioningPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-medium mb-2">Video Captioning</h1>
         <p className="text-muted-foreground">
-          Automatically generate accurate captions and subtitles for your videos.
+          Generate accurate captions for your videos to enhance accessibility.
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs defaultValue="caption" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="generate">Generate Captions</TabsTrigger>
-          <TabsTrigger value="library">Your Videos</TabsTrigger>
-          <TabsTrigger value="settings">Caption Settings</TabsTrigger>
+          <TabsTrigger value="caption">Generate Captions</TabsTrigger>
+          <TabsTrigger value="editor">Caption Editor</TabsTrigger>
+          <TabsTrigger value="about">About This Tool</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="generate" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Upload Video</CardTitle>
-              <CardDescription>
-                Upload a video file to generate captions or subtitles.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {!file ? (
-                <div 
-                  className="border-2 border-dashed rounded-lg p-10 text-center cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => document.getElementById("video-upload")?.click()}
+        <TabsContent value="caption" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload Video</CardTitle>
+                <CardDescription>
+                  Upload a video file to generate captions
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={handleFileChange}
+                  ref={fileInputRef}
+                  className="hidden"
+                />
+                
+                <div
+                  className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={handleUploadClick}
                 >
-                  <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="font-medium mb-1">Upload Video File</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Drag and drop your video file here, or click to browse
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Select Video
-                  </Button>
-                  <input 
-                    type="file" 
-                    id="video-upload" 
-                    className="hidden" 
-                    accept="video/*"
-                    onChange={handleFileChange}
-                  />
-                  <p className="text-xs text-muted-foreground mt-4">
-                    Supported formats: MP4, MOV, AVI, WebM (max 500MB)
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="h-20 w-32 bg-black rounded-md flex items-center justify-center">
-                      <VideoIcon className="h-8 w-8 text-white" />
+                  {videoPreview ? (
+                    <div className="space-y-4">
+                      <video
+                        ref={videoRef}
+                        src={videoPreview}
+                        className="mx-auto max-h-[240px] rounded-md"
+                        onTimeUpdate={handleTimeUpdate}
+                        onEnded={() => setIsPlaying(false)}
+                      />
+                      <div className="flex items-center justify-center gap-2">
+                        <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); handleRestart(); }}>
+                          <SkipBack className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); handlePlayPause(); }}>
+                          {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                        </Button>
+                        <span className="text-sm text-muted-foreground ml-2">
+                          <Clock className="h-4 w-4 inline mr-1" />
+                          {formatTime(currentTime)}
+                        </span>
+                      </div>
                     </div>
+                  ) : (
                     <div>
-                      <h3 className="font-medium">{file.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {(file.size / (1024 * 1024)).toFixed(2)} MB • {file.type}
-                      </p>
-                      {isUploading ? (
-                        <div className="flex items-center mt-1 text-xs text-primary">
-                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                          Uploading...
-                        </div>
-                      ) : (
-                        <p className="text-xs text-green-600 mt-1">
-                          Upload complete
-                        </p>
-                      )}
+                      <FileVideo className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+                      <p className="text-muted-foreground mb-2">Drag and drop your video file here or click to browse</p>
+                      <p className="text-xs text-muted-foreground">Supports MP4, WebM, and other common video formats</p>
                     </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="space-y-4">
-                    <h3 className="font-medium">Caption Options</h3>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          Language
-                        </label>
-                        <select className="w-full h-10 px-3 py-2 rounded-md border">
-                          <option>English</option>
-                          <option>Spanish</option>
-                          <option>French</option>
-                          <option>German</option>
-                          <option>Japanese</option>
-                          <option>Chinese</option>
-                          <option>Hindi</option>
-                          <option>Kannada</option>
-                          <option>Arabic</option>
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          Caption Format
-                        </label>
-                        <select className="w-full h-10 px-3 py-2 rounded-md border">
-                          <option>SRT Subtitles</option>
-                          <option>VTT Web Subtitles</option>
-                          <option>Plain Text Transcript</option>
-                        </select>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 mt-2">
-                      <input type="checkbox" id="timestamps" className="rounded" defaultChecked />
-                      <label htmlFor="timestamps" className="text-sm">
-                        Include timestamps
-                      </label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="speaker" className="rounded" defaultChecked />
-                      <label htmlFor="speaker" className="text-sm">
-                        Identify different speakers
-                      </label>
-                    </div>
-                    
-                    <Button 
-                      onClick={handleGenerateCaptions} 
-                      disabled={isUploading || isProcessing}
-                      className="w-full"
-                    >
-                      {isProcessing ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Processing Video...
-                        </>
-                      ) : (
-                        <>
-                          <VideoIcon className="mr-2 h-4 w-4" />
-                          Generate Captions
-                        </>
-                      )}
-                    </Button>
-                  </div>
+                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
 
-          {captionsGenerated && (
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="language">Caption Language</Label>
+                    <Select
+                      value={language}
+                      onValueChange={setLanguage}
+                    >
+                      <SelectTrigger id="language" className="w-full">
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="kn">ಕನ್ನಡ (Kannada)</SelectItem>
+                        <SelectItem value="hi">हिन्दी (Hindi)</SelectItem>
+                        <SelectItem value="es">Español</SelectItem>
+                        <SelectItem value="fr">Français</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button 
+                    onClick={generateCaptions} 
+                    disabled={!videoFile || isProcessing}
+                    className="w-full"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Processing Video...
+                      </>
+                    ) : (
+                      <>
+                        <Type className="mr-2 h-4 w-4" />
+                        Generate Captions
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>Generated Captions</CardTitle>
                 <CardDescription>
-                  Review and edit the automatically generated captions.
+                  Review and download the auto-generated captions
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="max-h-[400px] overflow-y-auto border rounded-md p-4">
-                    <div className="space-y-4">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <div key={i} className="space-y-1">
-                          <div className="text-xs text-muted-foreground">
-                            {String(i + 1).padStart(2, '0')}:
-                            {String(i * 15).padStart(2, '0')} - {String(i + 1).padStart(2, '0')}:
-                            {String((i + 1) * 15).padStart(2, '0')}
-                          </div>
-                          <Textarea 
-                            defaultValue={`This is an example of automatically generated captions for segment ${i + 1}. You can edit this text as needed.`} 
-                            className="min-h-[60px]"
-                          />
-                        </div>
-                      ))}
+              <CardContent className="space-y-4">
+                <div className="min-h-[240px] border rounded-md p-4 overflow-y-auto">
+                  {captions ? (
+                    <pre className="whitespace-pre-wrap text-sm font-mono">{captions}</pre>
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <p className="text-muted-foreground text-center">
+                        Captions will appear here after generation
+                      </p>
                     </div>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <Button variant="outline">
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit All
-                    </Button>
-                    <Button>
-                      <DownloadCloud className="mr-2 h-4 w-4" />
-                      Download Captions
-                    </Button>
-                  </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={downloadCaptions} disabled={!captions}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download SRT
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-          )}
+          </div>
         </TabsContent>
 
-        <TabsContent value="library" className="space-y-6">
+        <TabsContent value="editor" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Your Captioned Videos</CardTitle>
+              <CardTitle>Caption Editor</CardTitle>
               <CardDescription>
-                Browse and manage videos you've previously captioned.
+                Edit and refine your video captions
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <VideoIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground mb-4">
-                  You haven't captioned any videos yet
-                </p>
-                <Button variant="outline" onClick={() => setActiveTab("generate")}>
-                  Caption Your First Video
-                </Button>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="caption-editor">Edit Captions</Label>
+                  <Textarea
+                    id="caption-editor"
+                    className="font-mono min-h-[300px]"
+                    placeholder="Paste or edit captions here..."
+                    value={captions}
+                    onChange={(e) => setCaptions(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-4">
+                  <Label>Preview</Label>
+                  {videoPreview ? (
+                    <video
+                      src={videoPreview}
+                      controls
+                      className="w-full rounded-md max-h-[200px]"
+                    />
+                  ) : (
+                    <div className="border rounded-md p-4 h-[200px] flex items-center justify-center">
+                      <p className="text-muted-foreground">No video loaded</p>
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <Label>Translation Options</Label>
+                    <Select defaultValue="en">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Translate to..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="kn">ಕನ್ನಡ (Kannada)</SelectItem>
+                        <SelectItem value="hi">हिन्दी (Hindi)</SelectItem>
+                        <SelectItem value="es">Español</SelectItem>
+                        <SelectItem value="fr">Français</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Button className="w-full">
+                      <Languages className="mr-2 h-4 w-4" />
+                      Translate Captions
+                    </Button>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="settings" className="space-y-6">
+        <TabsContent value="about">
           <Card>
             <CardHeader>
-              <CardTitle>Caption Settings</CardTitle>
+              <CardTitle>About Video Captioning</CardTitle>
               <CardDescription>
-                Configure default settings for your video captions.
+                How this tool improves accessibility through accurate video captions
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <h3 className="font-medium">Default Options</h3>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Default Language
-                      </label>
-                      <select className="w-full h-10 px-3 py-2 rounded-md border">
-                        <option>English</option>
-                        <option>Spanish</option>
-                        <option>French</option>
-                        <option>German</option>
-                        <option>Japanese</option>
-                        <option>Hindi</option>
-                        <option>Kannada</option>
-                        <option>Arabic</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Caption Format
-                      </label>
-                      <select className="w-full h-10 px-3 py-2 rounded-md border">
-                        <option>SRT Subtitles</option>
-                        <option>VTT Web Subtitles</option>
-                        <option>Plain Text Transcript</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-4">
-                  <h3 className="font-medium">Appearance Settings</h3>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Text Color
-                      </label>
-                      <div className="flex">
-                        <Input type="color" defaultValue="#FFFFFF" className="w-12 h-10 p-1" />
-                        <Input defaultValue="#FFFFFF" className="flex-1 ml-2" />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Background
-                      </label>
-                      <div className="flex">
-                        <Input type="color" defaultValue="#000000" className="w-12 h-10 p-1" />
-                        <Input defaultValue="#000000" className="flex-1 ml-2" />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Opacity
-                      </label>
-                      <Input type="number" defaultValue="80" min="0" max="100" className="w-full" />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Font Size
-                      </label>
-                      <select className="w-full h-10 px-3 py-2 rounded-md border">
-                        <option>Small</option>
-                        <option selected>Medium</option>
-                        <option>Large</option>
-                        <option>Extra Large</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Font Family
-                      </label>
-                      <select className="w-full h-10 px-3 py-2 rounded-md border">
-                        <option>Arial</option>
-                        <option>Verdana</option>
-                        <option>Helvetica</option>
-                        <option>Times New Roman</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                
-                <Button className="w-full">
-                  Save Default Settings
-                </Button>
-              </div>
+            <CardContent className="space-y-4">
+              <p>
+                Our Video Captioning tool uses advanced speech recognition technology to automatically 
+                generate accurate captions for your videos. This makes your content more accessible 
+                to people who are deaf or hard of hearing, and improves the viewing experience in 
+                sound-sensitive environments.
+              </p>
+              
+              <h3 className="text-lg font-medium mt-4">Why Video Captioning Matters:</h3>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                <li>Makes content accessible to people with hearing disabilities</li>
+                <li>Helps viewers in noisy environments understand your content</li>
+                <li>Improves comprehension for non-native speakers</li>
+                <li>Boosts SEO as search engines can index caption text</li>
+                <li>Supports multilingual audiences with translation options</li>
+              </ul>
+              
+              <h3 className="text-lg font-medium mt-4">Supported Languages:</h3>
+              <p>
+                Our captioning tool supports multiple languages including English, ಕನ್ನಡ (Kannada), 
+                हिन्दी (Hindi), Español, and Français, with more being added regularly.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
