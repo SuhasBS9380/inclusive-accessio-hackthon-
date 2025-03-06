@@ -6,6 +6,11 @@ import {
   Type, 
   Home,
   LayoutDashboard,
+  ClipboardCheck,
+  Paintbrush,
+  ImagePlus,
+  Video,
+  TextCursorInput
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,6 +25,14 @@ export default function Sidebar() {
     { to: "/text-simplifier", icon: Type, label: "Text Simplifier" },
     { to: "/image-caption", icon: Image, label: "Image Caption" },
     { to: "/ai-assistant", icon: MessageSquare, label: "AI Assistant" },
+  ];
+
+  const accessibilityTools = [
+    { to: "/content-audit", icon: ClipboardCheck, label: "Content Audit" },
+    { to: "/design-assistant", icon: Paintbrush, label: "Design Assistant" },
+    { to: "/text-to-image", icon: ImagePlus, label: "Text-to-Image" },
+    { to: "/video-captioning", icon: Video, label: "Video Captioning" },
+    { to: "/text-resizer", icon: TextCursorInput, label: "Text Resizer" },
   ];
 
   return (
@@ -53,15 +66,20 @@ export default function Sidebar() {
             <div>
               <h3 className="text-xs font-medium text-muted-foreground pb-2 px-2">Accessibility Tools</h3>
               <div className="space-y-2 py-1">
-                <Button variant="outline" size="sm" className="w-full justify-start text-left text-sm font-normal">
-                  <span>Content Audit</span>
-                </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start text-left text-sm font-normal">
-                  <span>Design Assistant</span>
-                </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start text-left text-sm font-normal">
-                  <span>Text-to-Image</span>
-                </Button>
+                {accessibilityTools.map((tool) => (
+                  <Button 
+                    key={tool.to}
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start text-left text-sm font-normal"
+                    asChild
+                  >
+                    <NavLink to={tool.to}>
+                      <tool.icon className="h-4 w-4 mr-2" />
+                      <span>{tool.label}</span>
+                    </NavLink>
+                  </Button>
+                ))}
               </div>
             </div>
           </div>
