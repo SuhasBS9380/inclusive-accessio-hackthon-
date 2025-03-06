@@ -23,6 +23,8 @@ const languages: Language[] = [
   { code: "zh", name: "中文", flag: "🇨🇳" },
   { code: "ja", name: "日本語", flag: "🇯🇵" },
   { code: "ar", name: "العربية", flag: "🇸🇦" },
+  { code: "kn", name: "ಕನ್ನಡ", flag: "🇮🇳" },
+  { code: "hi", name: "हिन्दी", flag: "🇮🇳" },
 ];
 
 interface LanguageSwitcherProps {

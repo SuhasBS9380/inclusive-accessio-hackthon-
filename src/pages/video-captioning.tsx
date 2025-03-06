@@ -138,6 +138,9 @@ export default function VideoCaptioningPage() {
                           <option>German</option>
                           <option>Japanese</option>
                           <option>Chinese</option>
+                          <option>Hindi</option>
+                          <option>Kannada</option>
+                          <option>Arabic</option>
                         </select>
                       </div>
                       
@@ -154,14 +157,14 @@ export default function VideoCaptioningPage() {
                     </div>
                     
                     <div className="flex items-center space-x-2 mt-2">
-                      <input type="checkbox" id="timestamps" className="rounded" />
+                      <input type="checkbox" id="timestamps" className="rounded" defaultChecked />
                       <label htmlFor="timestamps" className="text-sm">
                         Include timestamps
                       </label>
                     </div>
                     
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="speaker" className="rounded" />
+                      <input type="checkbox" id="speaker" className="rounded" defaultChecked />
                       <label htmlFor="speaker" className="text-sm">
                         Identify different speakers
                       </label>
@@ -280,6 +283,9 @@ export default function VideoCaptioningPage() {
                         <option>French</option>
                         <option>German</option>
                         <option>Japanese</option>
+                        <option>Hindi</option>
+                        <option>Kannada</option>
+                        <option>Arabic</option>
                       </select>
                     </div>
                     
