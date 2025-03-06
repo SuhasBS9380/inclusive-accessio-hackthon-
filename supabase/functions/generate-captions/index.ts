@@ -1,56 +1,73 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+// Follow this setup guide to integrate the Deno language server with your editor:
+// https://deno.land/manual/getting_started/setup_your_environment
+// This enables autocomplete, go to definition, etc.
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { corsHeaders } from "../_shared/cors.ts";
+
+console.log("Generate captions function started");
 
 serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+  // Handle CORS
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const { videoUrl, language } = await req.json()
+    const { videoUrl, language } = await req.json();
 
-    // This would be where you'd call an actual AI service
-    // For now, we'll simulate generating captions based on language
-    
-    let captions = ""
-    
-    // Simulate delay for processing
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    if (language === "en") {
-      captions = "00:00:01,000 --> 00:00:04,000\nWelcome to our video presentation.\n\n00:00:05,000 --> 00:00:09,000\nToday we'll discuss accessibility features for videos."
-    } else if (language === "kn") {
-      captions = "00:00:01,000 --> 00:00:04,000\nನಮ್ಮ ವೀಡಿಯೋ ಪ್ರಸ್ತುತಿಗೆ ಸುಸ್ವಾಗತ.\n\n00:00:05,000 --> 00:00:09,000\nಇಂದು ನಾವು ವೀಡಿಯೊಗಳಿಗಾಗಿ ಪ್ರವೇಶಿಸಬಹುದಾದ ವೈಶಿಷ್ಟ್ಯಗಳ ಬಗ್ಗೆ ಚರ್ಚಿಸುತ್ತೇವೆ."
-    } else if (language === "hi") {
-      captions = "00:00:01,000 --> 00:00:04,000\nहमारी वीडियो प्रस्तुति में आपका स्वागत है।\n\n00:00:05,000 --> 00:00:09,000\nआज हम वीडियो के लिए सुलभता सुविधाओं पर चर्चा करेंगे।"
-    } else {
-      captions = "00:00:01,000 --> 00:00:04,000\nWelcome to our video presentation.\n\n00:00:05,000 --> 00:00:09,000\nToday we'll discuss accessibility features for videos."
-    }
+    // In a real implementation, you would:
+    // 1. Download the video or access it via the URL
+    // 2. Use speech recognition API to extract text
+    // 3. Format the captions
+    // 4. Return the caption text
 
-    console.log(`Generated captions in ${language} language`)
-    
+    // For now, we'll just simulate a response
+    const sampleCaptions = getSampleCaptions(language);
+
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
     return new Response(
       JSON.stringify({
-        captions,
-        language,
+        success: true,
+        captions: sampleCaptions,
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
-  } catch (error) {
-    console.error('Error generating captions:', error)
-    
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+        status: 200,
       }
-    )
+    );
+  } catch (error) {
+    console.error("Error processing request:", error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message,
+      }),
+      {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+        status: 400,
+      }
+    );
   }
-})
+});
+
+function getSampleCaptions(language: string): string {
+  if (language === "en") {
+    return "This is a sample English caption.\nThe video shows important content.\nThank you for watching.";
+  } else if (language === "hi") {
+    return "यह एक नमूना हिंदी कैप्शन है।\nवीडियो महत्वपूर्ण सामग्री दिखाता है।\nदेखने के लिए धन्यवाद।";
+  } else if (language === "kn") {
+    return "ಇದು ಮಾದರಿ ಕನ್ನಡ ಶೀರ್ಷಿಕೆಯಾಗಿದೆ.\nವೀಡಿಯೊ ಮಹತ್ವದ ವಿಷಯವನ್ನು ತೋರಿಸುತ್ತದೆ.\nವೀಕ್ಷಿಸಿದ್ದಕ್ಕೆ ಧನ್ಯವಾದಗಳು.";
+  } else {
+    return `This is a sample caption in ${language}.\nThe video shows important content.\nThank you for watching.`;
+  }
+}

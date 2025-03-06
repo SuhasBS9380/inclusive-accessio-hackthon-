@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,10 +7,12 @@ import { ArrowRight, Paintbrush, EyeOff, Check, Type, Palette, LayoutGrid, Image
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function DesignAssistantPage() {
   const [activeTab, setActiveTab] = useState("color");
   const { toast } = useToast();
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
 
   const handleCheckContrast = () => {
     toast({
@@ -27,6 +28,14 @@ export default function DesignAssistantPage() {
     });
   };
 
+  const languages = [
+    { value: "en", label: "English" },
+    { value: "hi", label: "Hindi" },
+    { value: "kn", label: "Kannada" },
+    { value: "es", label: "Spanish" },
+    { value: "fr", label: "French" }
+  ];
+
   return (
     <div className="animate-fade-in">
       <div className="mb-8">
@@ -34,6 +43,22 @@ export default function DesignAssistantPage() {
         <p className="text-muted-foreground">
           AI-powered tools to create more accessible and inclusive designs.
         </p>
+      </div>
+
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-2">Content Language</label>
+        <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+          <SelectTrigger className="w-full sm:w-[240px]">
+            <SelectValue placeholder="Select language" />
+          </SelectTrigger>
+          <SelectContent>
+            {languages.map((language) => (
+              <SelectItem key={language.value} value={language.value}>
+                {language.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
@@ -182,6 +207,8 @@ export default function DesignAssistantPage() {
               <CardTitle>Accessible Typography Recommendations</CardTitle>
               <CardDescription>
                 Create clear, readable text that works for all users.
+                {selectedLanguage === "hi" && " इसमें हिंदी टेक्स्ट भी शामिल है।"}
+                {selectedLanguage === "kn" && " ಇದರಲ್ಲಿ ಕನ್ನಡ ಪಠ್ಯವೂ ಸೇರಿದೆ."}
               </CardDescription>
             </CardHeader>
             <CardContent>
