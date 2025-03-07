@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { AlertCircle, Camera, CameraOff } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/context/auth-context";
 import { Navigate } from "react-router-dom";
+import EmotionResults from "@/components/EmotionResults";
 
 interface MorphCastBarrierEvent extends Event {
   detail: any;
@@ -160,40 +162,44 @@ export default function EmotionDetectorPage() {
         </Alert>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Live Emotion Analysis</CardTitle>
-          <CardDescription>
-            Your facial expressions will be analyzed in real-time
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div 
-            id="video-container" 
-            ref={containerRef}
-            className="w-full max-w-2xl h-[480px] mx-auto border rounded-lg overflow-hidden bg-black relative"
-          >
-            <video 
-              id="video" 
-              ref={videoRef}
-              width="100%" 
-              height="100%" 
-              autoPlay 
-              playsInline
-              muted
-              className="object-cover w-full h-full"
-            ></video>
-            {!cameraActive && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/50">
-                <Camera className="h-16 w-16 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground text-center px-4">
-                  Click the "Start Camera" button above to begin emotion detection
-                </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Live Camera Feed</CardTitle>
+            <CardDescription>
+              Your facial expressions will be analyzed in real-time
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div 
+              id="video-container" 
+              ref={containerRef}
+              className="w-full aspect-video mx-auto border rounded-lg overflow-hidden bg-black relative"
+            >
+              <video 
+                id="video" 
+                ref={videoRef}
+                width="100%" 
+                height="100%" 
+                autoPlay 
+                playsInline
+                muted
+                className="object-cover w-full h-full"
+              ></video>
+              {!cameraActive && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/50">
+                  <Camera className="h-16 w-16 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground text-center px-4">
+                    Click the "Start Camera" button above to begin emotion detection
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <EmotionResults active={cameraActive} />
+      </div>
     </div>
   );
 }
