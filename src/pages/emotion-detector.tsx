@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,10 @@ import { AlertCircle, Camera, CameraOff } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/context/auth-context";
 import { Navigate } from "react-router-dom";
+
+interface MorphCastBarrierEvent extends Event {
+  detail: any;
+}
 
 export default function EmotionDetectorPage() {
   const { user } = useAuth();
@@ -15,51 +18,42 @@ export default function EmotionDetectorPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only load scripts if the component is mounted
     if (typeof window === "undefined") return;
 
-    // Load MorphCast SDK scripts
     const loadScripts = async () => {
       try {
-        // Load MorphTools script
         const mphToolsScript = document.createElement("script");
         mphToolsScript.src = "https://sdk.morphcast.com/mphtools/v1.1/mphtools.js";
         mphToolsScript.setAttribute("data-config", "cameraPrivacyPopup, compatibilityUI, compatibilityAutoCheck");
         document.body.appendChild(mphToolsScript);
 
-        // Wait for MorphTools to load
         await new Promise<void>((resolve) => {
           mphToolsScript.onload = () => resolve();
         });
 
-        // Load AI SDK script
         const aiSdkScript = document.createElement("script");
         aiSdkScript.src = "https://ai-sdk.morphcast.com/v1.16/ai-sdk.js";
         document.body.appendChild(aiSdkScript);
 
-        // Wait for AI SDK to load
         await new Promise<void>((resolve) => {
           aiSdkScript.onload = () => resolve();
         });
 
-        // Load overlay script
         const overlayScript = document.createElement("script");
         overlayScript.src = "https://sdk.morphcast.com/mphoverlay/v0.1/mph-ai-overlay.js";
         overlayScript.type = "module";
         document.body.appendChild(overlayScript);
 
-        // Initialize MorphCast when scripts are loaded
         if (window.CY && window.MphTools) {
-          // Set privacy text
           window.MphTools.CameraPrivacyPopup.setText({
             title: "Allow us to use your camera",
             description: "This experience is designed to be viewed with your camera on. The next screen will ask your consent to access data from your camera.",
             url: window.location.origin + "/privacy-policy"
           });
 
-          // Add event listener for barrier events
-          window.addEventListener(window.CY.modules().EVENT_BARRIER.eventName, (evt) => {
-            console.log('EVENT_BARRIER result', evt.detail);
+          window.addEventListener(window.CY.modules().EVENT_BARRIER.eventName, (evt: Event) => {
+            const morphCastEvent = evt as MorphCastBarrierEvent;
+            console.log('EVENT_BARRIER result', morphCastEvent.detail);
           });
         }
       } catch (err) {
@@ -70,12 +64,10 @@ export default function EmotionDetectorPage() {
 
     loadScripts();
 
-    // Clean up scripts when component unmounts
     return () => {
       const scripts = document.querySelectorAll("script[src*='morphcast']");
       scripts.forEach(script => script.remove());
       
-      // Stop camera if active
       if (cameraActive && videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream;
         const tracks = stream.getTracks();
@@ -99,11 +91,9 @@ export default function EmotionDetectorPage() {
         .then(({ start }) => {
           start();
           
-          // Get the camera stream
           navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
               if (videoRef.current) {
-                // Set the video source to the camera stream
                 videoRef.current.srcObject = stream;
                 setCameraActive(true);
                 setError(null);
@@ -130,7 +120,6 @@ export default function EmotionDetectorPage() {
     }
   };
 
-  // Redirect to login if not authenticated
   if (!user) {
     return <Navigate to="/auth" />;
   }
