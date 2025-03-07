@@ -2,16 +2,16 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/ecb70ccb-0b2b-4639-9635-47fa08640be8
+**URL**: [https://lovable.dev/projects/ecb70ccb-0b2b-4639-9635-47fa08640be8](https://inclusive-accessio.lovable.app/)
 
 
 
 **Use Lovable**
 
-**used api's 
-googl cooud api
-chat-gpt api
-captioning api
+**used api's **
+googl cooud api**
+chat-gpt api**
+captioning api***
 
 **Use your preferred IDE**
 
