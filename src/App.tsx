@@ -39,18 +39,22 @@ const App = () => (
                 <Route path="/" element={<Navigate to="/auth" />} />
                 <Route path="/app" element={<Layout />}>
                   <Route index element={<HomePage />} />
-                  <Route path="/app/text-simplifier" element={<TextSimplifierPage />} />
-                  <Route path="/app/image-caption" element={<ImageCaptionPage />} />
-                  <Route path="/app/ai-assistant" element={<AiAssistantPage />} />
-                  <Route path="/app/dashboard" element={<DashboardPage />} />
-                  <Route path="/app/content-audit" element={<ContentAuditPage />} />
-                  <Route path="/app/design-assistant" element={<DesignAssistantPage />} />
-                  <Route path="/app/text-to-image" element={<TextToImagePage />} />
-                  <Route path="/app/video-captioning" element={<VideoCaptioningPage />} />
-                  <Route path="/app/text-resizer" element={<TextResizerPage />} />
-                  <Route path="/app/emotion-detector" element={<EmotionDetectorPage />} />
+                  <Route path="text-simplifier" element={<TextSimplifierPage />} />
+                  <Route path="image-caption" element={<ImageCaptionPage />} />
+                  <Route path="ai-assistant" element={<AiAssistantPage />} />
+                  <Route path="dashboard" element={<DashboardPage />} />
+                  <Route path="content-audit" element={<ContentAuditPage />} />
+                  <Route path="design-assistant" element={<DesignAssistantPage />} />
+                  <Route path="text-to-image" element={<TextToImagePage />} />
+                  <Route path="video-captioning" element={<VideoCaptioningPage />} />
+                  <Route path="text-resizer" element={<TextResizerPage />} />
+                  <Route path="emotion-detector" element={<EmotionDetectorPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
+                <Route path="/emotion-detector" element={<Navigate to="/app/emotion-detector" />} />
+                <Route path="/text-simplifier" element={<Navigate to="/app/text-simplifier" />} />
+                <Route path="/image-caption" element={<Navigate to="/app/image-caption" />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
           </SidebarProvider>
