@@ -185,3 +185,115 @@
   padding: 0;
   text-align: left;
 }
+
+/* Animation for auth page bubbles */
+.auth-container .bubble {
+  position: absolute;
+  bottom: -20px;
+  width: 20px;
+  height: 20px;
+  background: hsl(var(--primary) / 10%);
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: rise 15s infinite ease-in;
+  z-index: 0;
+}
+
+@keyframes rise {
+  0% {
+    bottom: -20px;
+    transform: translateX(0) scale(1);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateX(10px) scale(1.5);
+  }
+  100% {
+    bottom: 100%;
+    transform: translateX(-20px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* Set each bubble to a unique position and delay */
+.auth-container .bubble:nth-child(even) {
+  animation-delay: 0.5s;
+  left: 10%;
+}
+
+.auth-container .bubble:nth-child(4n) {
+  animation-delay: 1s;
+  left: 20%;
+}
+
+.auth-container .bubble:nth-child(3n) {
+  animation-delay: 1.5s;
+  left: 30%;
+}
+
+.auth-container .bubble:nth-child(5n) {
+  animation-delay: 2s;
+  left: 40%;
+}
+
+.auth-container .bubble:nth-child(7n) {
+  animation-delay: 2.5s;
+  left: 50%;
+}
+
+.auth-container .bubble:nth-child(2n) {
+  animation-delay: 3s;
+  left: 60%;
+}
+
+.auth-container .bubble:nth-child(6n) {
+  animation-delay: 3.5s;
+  left: 70%;
+}
+
+.auth-container .bubble:nth-child(9n) {
+  animation-delay: 4s;
+  left: 80%;
+}
+
+.auth-container .bubble:nth-child(3n + 1) {
+  animation-delay: 4.5s;
+  left: 90%;
+}
+
+/* Different sizes for bubbles */
+.auth-container .bubble:nth-child(3n) {
+  width: 15px;
+  height: 15px;
+}
+
+.auth-container .bubble:nth-child(5n) {
+  width: 25px;
+  height: 25px;
+}
+
+.auth-container .bubble:nth-child(7n) {
+  width: 35px;
+  height: 35px;
+}
+
+/* Different animation durations */
+.auth-container .bubble:nth-child(2n) {
+  animation-duration: 20s;
+}
+
+.auth-container .bubble:nth-child(4n) {
+  animation-duration: 25s;
+}
+
+.auth-container .bubble:nth-child(6n) {
+  animation-duration: 30s;
+}
+
+/* Hover animations for auth page */
+.auth-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}

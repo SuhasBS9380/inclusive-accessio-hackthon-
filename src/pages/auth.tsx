@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, LogIn, UserPlus, User, Lock, Mail } from "lucide-react";
+import { Loader2, LogIn, UserPlus, User, Lock, Mail, ArrowRight } from "lucide-react";
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
@@ -33,6 +33,16 @@ export default function AuthPage() {
     const card = document.querySelector('.auth-card');
     if (card) {
       card.classList.add('animate-in', 'fade-in-50', 'duration-500');
+    }
+
+    // Add the animated background effect
+    const container = document.querySelector('.auth-container');
+    if (container) {
+      for (let i = 0; i < 50; i++) {
+        const bubble = document.createElement('div');
+        bubble.classList.add('bubble');
+        container.appendChild(bubble);
+      }
     }
 
     return () => subscription.unsubscribe();
@@ -96,28 +106,42 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/30 bg-gradient-to-b from-background to-muted/20">
-      <div className="w-full max-w-md px-4 transition-all duration-500 hover:translate-y-[-5px]">
-        <Card className="w-full auth-card shadow-lg border-primary/10">
-          <Tabs defaultValue="signin">
+    <div className="auth-container flex items-center justify-center min-h-screen overflow-hidden relative">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5 z-0"></div>
+      
+      <div className="w-full max-w-md px-4 z-10 transition-all duration-500">
+        <Card className="w-full auth-card shadow-2xl border-primary/10 backdrop-blur-sm bg-background/90">
+          <Tabs defaultValue="signin" className="w-full">
             <CardHeader className="space-y-2">
-              <div className="flex items-center justify-center mb-2">
-                <span className="flex items-center justify-center rounded-lg bg-primary h-12 w-12 text-xl text-primary-foreground font-semibold transition-all duration-300 hover:scale-110">
-                  I
-                </span>
+              <div className="flex items-center justify-center mb-3">
+                <div className="relative">
+                  <span className="flex items-center justify-center rounded-lg bg-primary h-16 w-16 text-2xl text-primary-foreground font-semibold transition-all duration-300 hover:scale-110 hover:rotate-3">
+                    I
+                  </span>
+                  <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-secondary text-xs animate-pulse">
+                    AI
+                  </span>
+                </div>
               </div>
-              <CardTitle className="text-2xl text-center">
+              <CardTitle className="text-2xl text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 Welcome to InclusiveAI
               </CardTitle>
               <CardDescription className="text-center">
                 Sign in to access all accessibility tools
               </CardDescription>
-              <TabsList className="grid grid-cols-2 mt-4">
-                <TabsTrigger value="signin" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300">
+              <TabsList className="grid grid-cols-2 mt-6 rounded-lg">
+                <TabsTrigger 
+                  value="signin" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300 rounded-l-lg"
+                >
                   <LogIn className="mr-2 h-4 w-4" />
                   Sign In
                 </TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300">
+                <TabsTrigger 
+                  value="signup" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300 rounded-r-lg"
+                >
                   <UserPlus className="mr-2 h-4 w-4" />
                   Sign Up
                 </TabsTrigger>
@@ -125,44 +149,57 @@ export default function AuthPage() {
             </CardHeader>
 
             <CardContent>
-              <TabsContent value="signin" className="animate-in fade-in-50 duration-300 data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0 data-[state=inactive]:duration-300">
+              <TabsContent 
+                value="signin" 
+                className="animate-in fade-in-50 duration-500 data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0 data-[state=inactive]:duration-300"
+              >
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email" className="flex items-center">
-                      <Mail className="mr-2 h-4 w-4" />
+                      <Mail className="mr-2 h-4 w-4 text-primary" />
                       Email
                     </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/50 pl-10 pr-3"
+                      />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="password" className="flex items-center">
-                        <Lock className="mr-2 h-4 w-4" />
+                        <Lock className="mr-2 h-4 w-4 text-primary" />
                         Password
                       </Label>
                       <Button variant="link" className="p-0 h-auto text-xs">
                         Forgot password?
                       </Button>
                     </div>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/50 pl-10 pr-3"
+                      />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    </div>
                   </div>
-                  <Button type="submit" className="w-full transition-all duration-300 hover:brightness-110 hover:shadow-md" disabled={loading}>
+                  <Button 
+                    type="submit" 
+                    className="w-full transition-all duration-300 hover:brightness-110 hover:shadow-md bg-gradient-to-r from-primary to-primary hover:scale-[1.02]" 
+                    disabled={loading}
+                  >
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -172,48 +209,62 @@ export default function AuthPage() {
                       <>
                         <LogIn className="mr-2 h-4 w-4" />
                         Sign In
+                        <ArrowRight className="ml-2 h-4 w-4 animate-pulse" />
                       </>
                     )}
                   </Button>
                 </form>
               </TabsContent>
 
-              <TabsContent value="signup" className="animate-in fade-in-50 duration-300 data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0 data-[state=inactive]:duration-300">
+              <TabsContent 
+                value="signup"
+                className="animate-in fade-in-50 duration-500 data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0 data-[state=inactive]:duration-300"
+              >
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="signup-email" className="flex items-center">
-                      <Mail className="mr-2 h-4 w-4" />
+                      <Mail className="mr-2 h-4 w-4 text-primary" />
                       Email
                     </Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/50 pl-10 pr-3"
+                      />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password" className="flex items-center">
-                      <Lock className="mr-2 h-4 w-4" />
+                      <Lock className="mr-2 h-4 w-4 text-primary" />
                       Password
                     </Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
-                    />
-                    <p className="text-xs text-muted-foreground">
+                    <div className="relative">
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/50 pl-10 pr-3"
+                      />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
                       Password must be at least 6 characters long
                     </p>
                   </div>
-                  <Button type="submit" className="w-full transition-all duration-300 hover:brightness-110 hover:shadow-md" disabled={loading}>
+                  <Button 
+                    type="submit" 
+                    className="w-full transition-all duration-300 hover:brightness-110 hover:shadow-md bg-gradient-to-r from-primary to-primary hover:scale-[1.02]" 
+                    disabled={loading}
+                  >
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -223,6 +274,7 @@ export default function AuthPage() {
                       <>
                         <UserPlus className="mr-2 h-4 w-4" />
                         Create Account
+                        <ArrowRight className="ml-2 h-4 w-4 animate-pulse" />
                       </>
                     )}
                   </Button>
@@ -243,11 +295,19 @@ export default function AuthPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-2 w-full">
-                <Button variant="outline" className="transition-all duration-300 hover:bg-muted" disabled>
+                <Button 
+                  variant="outline" 
+                  className="transition-all duration-300 hover:bg-muted hover:-translate-y-1" 
+                  disabled
+                >
                   <User className="mr-2 h-4 w-4" />
                   Google
                 </Button>
-                <Button variant="outline" className="transition-all duration-300 hover:bg-muted" disabled>
+                <Button 
+                  variant="outline" 
+                  className="transition-all duration-300 hover:bg-muted hover:-translate-y-1" 
+                  disabled
+                >
                   <User className="mr-2 h-4 w-4" />
                   GitHub
                 </Button>
