@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "./context/auth-context";
@@ -19,6 +19,7 @@ import DesignAssistantPage from "./pages/design-assistant";
 import TextToImagePage from "./pages/text-to-image";
 import VideoCaptioningPage from "./pages/video-captioning";
 import TextResizerPage from "./pages/text-resizer";
+import EmotionDetectorPage from "./pages/emotion-detector";
 import AuthPage from "./pages/auth";
 import NotFound from "./pages/NotFound";
 
@@ -35,17 +36,19 @@ const App = () => (
             <BrowserRouter>
               <Routes>
                 <Route path="/auth" element={<AuthPage />} />
-                <Route path="/" element={<Layout />}>
+                <Route path="/" element={<Navigate to="/auth" />} />
+                <Route path="/app" element={<Layout />}>
                   <Route index element={<HomePage />} />
-                  <Route path="/text-simplifier" element={<TextSimplifierPage />} />
-                  <Route path="/image-caption" element={<ImageCaptionPage />} />
-                  <Route path="/ai-assistant" element={<AiAssistantPage />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/content-audit" element={<ContentAuditPage />} />
-                  <Route path="/design-assistant" element={<DesignAssistantPage />} />
-                  <Route path="/text-to-image" element={<TextToImagePage />} />
-                  <Route path="/video-captioning" element={<VideoCaptioningPage />} />
-                  <Route path="/text-resizer" element={<TextResizerPage />} />
+                  <Route path="/app/text-simplifier" element={<TextSimplifierPage />} />
+                  <Route path="/app/image-caption" element={<ImageCaptionPage />} />
+                  <Route path="/app/ai-assistant" element={<AiAssistantPage />} />
+                  <Route path="/app/dashboard" element={<DashboardPage />} />
+                  <Route path="/app/content-audit" element={<ContentAuditPage />} />
+                  <Route path="/app/design-assistant" element={<DesignAssistantPage />} />
+                  <Route path="/app/text-to-image" element={<TextToImagePage />} />
+                  <Route path="/app/video-captioning" element={<VideoCaptioningPage />} />
+                  <Route path="/app/text-resizer" element={<TextResizerPage />} />
+                  <Route path="/app/emotion-detector" element={<EmotionDetectorPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>

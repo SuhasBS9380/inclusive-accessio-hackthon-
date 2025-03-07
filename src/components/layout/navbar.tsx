@@ -8,6 +8,7 @@ import {
   SheetTrigger 
 } from "@/components/ui/sheet";
 import ModeToggle from "../ui/mode-toggle";
+import { UserProfile } from "../user-profile";
 import { useEffect, useState } from "react";
 
 export default function Navbar() {
@@ -31,7 +32,7 @@ export default function Navbar() {
     }`}>
       <div className="container-wide flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2 text-xl font-semibold">
+          <Link to="/app" className="flex items-center gap-2 text-xl font-semibold">
             <span className="flex items-center justify-center rounded-lg bg-primary h-8 w-8 text-primary-foreground font-semibold">
               I
             </span>
@@ -40,24 +41,23 @@ export default function Navbar() {
         </div>
         
         <nav className="hidden md:flex items-center gap-6">
-          <Link to="/text-simplifier" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link to="/app/text-simplifier" className="text-sm font-medium hover:text-primary transition-colors">
             Text Simplifier
           </Link>
-          <Link to="/image-caption" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link to="/app/image-caption" className="text-sm font-medium hover:text-primary transition-colors">
             Image Caption
           </Link>
-          <Link to="/ai-assistant" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link to="/app/ai-assistant" className="text-sm font-medium hover:text-primary transition-colors">
             AI Assistant
+          </Link>
+          <Link to="/app/emotion-detector" className="text-sm font-medium hover:text-primary transition-colors">
+            Emotion Detector
           </Link>
         </nav>
         
         <div className="flex items-center gap-4">
           <ModeToggle />
-          <Link to="/dashboard">
-            <Button variant="outline" size="sm" className="hidden md:flex">
-              Dashboard
-            </Button>
-          </Link>
+          <UserProfile />
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
@@ -67,19 +67,22 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="flex flex-col">
               <div className="flex flex-col space-y-4 mt-6">
-                <Link to="/" className="text-base font-medium p-2">
+                <Link to="/app" className="text-base font-medium p-2">
                   Home
                 </Link>
-                <Link to="/text-simplifier" className="text-base font-medium p-2">
+                <Link to="/app/text-simplifier" className="text-base font-medium p-2">
                   Text Simplifier
                 </Link>
-                <Link to="/image-caption" className="text-base font-medium p-2">
+                <Link to="/app/image-caption" className="text-base font-medium p-2">
                   Image Caption
                 </Link>
-                <Link to="/ai-assistant" className="text-base font-medium p-2">
+                <Link to="/app/ai-assistant" className="text-base font-medium p-2">
                   AI Assistant
                 </Link>
-                <Link to="/dashboard" className="text-base font-medium p-2">
+                <Link to="/app/emotion-detector" className="text-base font-medium p-2">
+                  Emotion Detector
+                </Link>
+                <Link to="/app/dashboard" className="text-base font-medium p-2">
                   Dashboard
                 </Link>
               </div>

@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, LogIn, UserPlus, User, Lock, Mail } from "lucide-react";
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
@@ -28,6 +28,12 @@ export default function AuthPage() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
+
+    // Add animation to the card
+    const card = document.querySelector('.auth-card');
+    if (card) {
+      card.classList.add('animate-in', 'fade-in-50', 'duration-500');
+    }
 
     return () => subscription.unsubscribe();
   }, []);
@@ -82,36 +88,50 @@ export default function AuthPage() {
       description: "You've been successfully signed in",
     });
     setLoading(false);
-    navigate("/");
+    navigate("/app");
   };
 
   if (session) {
-    return <Navigate to="/" />;
+    return <Navigate to="/app" />;
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/50">
-      <div className="w-full max-w-md px-4">
-        <Card className="w-full">
+    <div className="flex items-center justify-center min-h-screen bg-muted/30 bg-gradient-to-b from-background to-muted/20">
+      <div className="w-full max-w-md px-4 transition-all duration-500 hover:translate-y-[-5px]">
+        <Card className="w-full auth-card shadow-lg border-primary/10">
           <Tabs defaultValue="signin">
-            <CardHeader>
+            <CardHeader className="space-y-2">
+              <div className="flex items-center justify-center mb-2">
+                <span className="flex items-center justify-center rounded-lg bg-primary h-12 w-12 text-xl text-primary-foreground font-semibold transition-all duration-300 hover:scale-110">
+                  I
+                </span>
+              </div>
               <CardTitle className="text-2xl text-center">
-                Accessibility Tools
+                Welcome to InclusiveAI
               </CardTitle>
               <CardDescription className="text-center">
                 Sign in to access all accessibility tools
               </CardDescription>
               <TabsList className="grid grid-cols-2 mt-4">
-                <TabsTrigger value="signin">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="signin" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Sign In
+                </TabsTrigger>
+                <TabsTrigger value="signup" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Sign Up
+                </TabsTrigger>
               </TabsList>
             </CardHeader>
 
             <CardContent>
-              <TabsContent value="signin">
+              <TabsContent value="signin" className="animate-in fade-in-50 duration-300 data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0 data-[state=inactive]:duration-300">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email" className="flex items-center">
+                      <Mail className="mr-2 h-4 w-4" />
+                      Email
+                    </Label>
                     <Input
                       id="email"
                       type="email"
@@ -119,11 +139,15 @@ export default function AuthPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password" className="flex items-center">
+                        <Lock className="mr-2 h-4 w-4" />
+                        Password
+                      </Label>
                       <Button variant="link" className="p-0 h-auto text-xs">
                         Forgot password?
                       </Button>
@@ -135,25 +159,32 @@ export default function AuthPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full transition-all duration-300 hover:brightness-110 hover:shadow-md" disabled={loading}>
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Signing in...
                       </>
                     ) : (
-                      "Sign In"
+                      <>
+                        <LogIn className="mr-2 h-4 w-4" />
+                        Sign In
+                      </>
                     )}
                   </Button>
                 </form>
               </TabsContent>
 
-              <TabsContent value="signup">
+              <TabsContent value="signup" className="animate-in fade-in-50 duration-300 data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0 data-[state=inactive]:duration-300">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email" className="flex items-center">
+                      <Mail className="mr-2 h-4 w-4" />
+                      Email
+                    </Label>
                     <Input
                       id="signup-email"
                       type="email"
@@ -161,10 +192,14 @@ export default function AuthPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <Label htmlFor="signup-password" className="flex items-center">
+                      <Lock className="mr-2 h-4 w-4" />
+                      Password
+                    </Label>
                     <Input
                       id="signup-password"
                       type="password"
@@ -172,19 +207,23 @@ export default function AuthPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
                     />
                     <p className="text-xs text-muted-foreground">
                       Password must be at least 6 characters long
                     </p>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full transition-all duration-300 hover:brightness-110 hover:shadow-md" disabled={loading}>
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Creating account...
                       </>
                     ) : (
-                      "Create Account"
+                      <>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Create Account
+                      </>
                     )}
                   </Button>
                 </form>
@@ -204,8 +243,14 @@ export default function AuthPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-2 w-full">
-                <Button variant="outline" disabled>Google</Button>
-                <Button variant="outline" disabled>GitHub</Button>
+                <Button variant="outline" className="transition-all duration-300 hover:bg-muted" disabled>
+                  <User className="mr-2 h-4 w-4" />
+                  Google
+                </Button>
+                <Button variant="outline" className="transition-all duration-300 hover:bg-muted" disabled>
+                  <User className="mr-2 h-4 w-4" />
+                  GitHub
+                </Button>
               </div>
             </CardFooter>
           </Tabs>

@@ -10,7 +10,8 @@ import {
   Paintbrush,
   ImagePlus,
   Video,
-  TextCursorInput
+  TextCursorInput,
+  Smile
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ export default function Sidebar() {
     { to: "/text-simplifier", icon: Type, label: "Text Simplifier" },
     { to: "/image-caption", icon: Image, label: "Image Caption" },
     { to: "/ai-assistant", icon: MessageSquare, label: "AI Assistant" },
+    { to: "/emotion-detector", icon: Smile, label: "Emotion Detector" },
   ];
 
   const accessibilityTools = [
