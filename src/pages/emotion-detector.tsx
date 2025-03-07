@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,9 +65,19 @@ export default function EmotionDetectorPage() {
 
     loadScripts();
 
+    const removeOverlayElements = () => {
+      const overlayElements = document.querySelectorAll('[id^="mph-"]');
+      overlayElements.forEach(el => el.remove());
+    };
+
+    removeOverlayElements();
+    const intervalId = setInterval(removeOverlayElements, 1000);
+
     return () => {
       const scripts = document.querySelectorAll("script[src*='morphcast']");
       scripts.forEach(script => script.remove());
+      
+      clearInterval(intervalId);
       
       if (cameraActive && videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream;

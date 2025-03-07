@@ -89,7 +89,13 @@ const EmotionResults = ({ active }: EmotionResultsProps) => {
           <BarChart data={emotions} layout="vertical" margin={{ left: 20, right: 20 }}>
             <XAxis type="number" domain={[0, 100]} />
             <YAxis dataKey="name" type="category" width={80} />
-            <Tooltip formatter={(value) => [`${value.toFixed(1)}%`, 'Intensity']} />
+            <Tooltip formatter={(value) => {
+              // Fix the TypeScript error by checking the type
+              if (typeof value === 'number') {
+                return [`${value.toFixed(1)}%`, 'Intensity'];
+              }
+              return [`${value}%`, 'Intensity'];
+            }} />
             <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
